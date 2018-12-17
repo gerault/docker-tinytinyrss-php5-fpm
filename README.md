@@ -10,7 +10,7 @@ This php image should be used with a web server container and a database contain
 ## docker-compose
 You will find below an example of my docker-compose file.
 I use a nginx web server and a mysql instance.
-As the configuration of the databse is stored in the php files, I use a volume to make the persistence.
+As the configuration of the database is stored in the php files, I use a volume to make the persistence.
 I use a second volume to persist the database
 
 ```
@@ -18,10 +18,10 @@ version: '2'
 services:
         nginx:
                 image: gerault/docker-nginx:latest
-                container_name: mytinytodo_nginx_prod
+                container_name: tinytinyrss_nginx_prod
                 restart: always
                 ports:
-                        - "8081:80"
+                        - "8082:80"
                 volumes:
                         - ./conf_files/site.conf:/etc/nginx/conf.d/site.conf:ro
                 volumes_from:
@@ -30,26 +30,25 @@ services:
                         - php
 
         php:
-                image: gerault/docker-mytinytodo-php5-fpm:latest
-                container_name: mytinytodo_php_prod
+                image: gerault/docker-tinytinyrss-php5-fpm:latest
+                container_name: tinytinyrss_php_prod
                 restart: always
                 volumes:
-                        - myphpdata:/var/www/html/mytinytodo
+                        - myphpdata:/var/www/html/tt-rss
                 links:
                         - mysql-db
 
         mysql-db:
                 image: mysql:5.7
-                container_name: mytinytodo_mysql_prod
+                container_name: tinytinyrss_mysql_prod
                 restart: always
                 volumes:
                         - mysqldata:/var/lib/mysql
                 environment:
                         - MYSQL_ROOT_PASSWORD=rootpwd
-                        - MYSQL_DATABASE=mytinytodo
-                        - MYSQL_USER=mytinytodouser
-                        - MYSQL_PASSWORD=mytinytodopwd
-
+                        - MYSQL_DATABASE=tinytinyrss
+                        - MYSQL_USER=tinytinyrssuser
+                        - MYSQL_PASSWORD=tinytinyrsspwd
 
 # docker volumes to store data
 volumes:
@@ -62,10 +61,9 @@ Here is the content of the nginx conf file (**conf_files/site.conf**)
 ```
 server {
     listen 80;
-    server_name your_server_name;
-
     index index.php index.html;
-    root /var/www/html/mytinytodo;
+    server_name localhost your-server-name;
+    root /var/www/html/tt-rss;
 
     location ~ \.php$ {
         try_files $uri =404;
@@ -77,5 +75,6 @@ server {
         fastcgi_param PATH_INFO $fastcgi_path_info;
     }
 }
+
 
 ```
